@@ -1,6 +1,6 @@
-# Phono-Phylo Inference Pipeline
+# Phonogenetic Inference Pipeline
 
-A modular, user-friendly pipeline for analyzing phonetic diversity across languages. Recognizes phones from audio files, computes linguistic features, and infers phylogenetic relationships through hierarchical clustering.
+A modular, user-friendly pipeline for analyzing phonetic diversity across languages. Intended for phylogenetic inference. Recognizes phones from audio files, computes linguistic features, and infers phylogenetic relationships through hierarchical clustering.
 
 ## Quick Start
 
