@@ -2,7 +2,38 @@
 
 A modular, user-friendly pipeline for analyzing phonetic diversity across languages. Recognizes phones from audio files, computes linguistic features, and infers phylogenetic relationships through hierarchical clustering.
 
-## Quick Start
+## ⚡ Quick Start (Easiest Way)
+
+**No Python experience needed! Just:**
+
+```bash
+# 1. Put your audio files in input/ folder
+#    input/english/*.wav
+#    input/french/*.wav
+#    etc.
+
+# 2. Run ONE of these commands:
+
+# Option A: Shell script (Mac/Linux):
+./run_pipeline.sh
+
+# Option B: Python (Any OS):
+python run_pipeline.py
+```
+
+That's it! The script will:
+- ✅ Recognize phones from all audio files
+- ✅ Summarize statistics per language
+- ✅ Create feature vectors
+- ✅ Build a phylogenetic tree (dendrogram)
+
+Results go to `output/` folder with visualizations included.
+
+---
+
+## Quick Start (Manual Steps)
+
+## Quick Start (Manual Steps)
 
 ### 1. **Setup** (One-time)
 
@@ -64,6 +95,25 @@ output/
 ---
 
 ## Detailed Usage
+
+### One-Script Convenience Options
+
+If you prefer not to run 4 separate scripts, use one of these all-in-one runners:
+
+**Option 1: Shell script (Mac/Linux)**
+```bash
+chmod +x run_pipeline.sh
+./run_pipeline.sh
+```
+
+**Option 2: Python script (Windows/Mac/Linux)**
+```bash
+python run_pipeline.py
+```
+
+Both do the same thing: automatically run all 4 steps in sequence with clear progress messages.
+
+---
 
 ### Script 1: Phone Recognition
 
