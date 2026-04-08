@@ -58,13 +58,14 @@ def recognize_phones_from_file(wav_file: Path, recognizer) -> Tuple[List[str], b
         Tuple of (phones list, success flag)
     """
     try:
-        tok, am_embeddings, lm_embeddings = recognizer.recognize_custom(str(wav_file))
+        # Use recognize() method (not recognize_custom)
+        phones = recognizer.recognize(str(wav_file))
         
         # Convert token string to list if needed
-        if isinstance(tok, str):
-            phones = tok.split()
+        if isinstance(phones, str):
+            phones = phones.split()
         else:
-            phones = list(tok)
+            phones = list(phones)
         
         # Validate non-empty
         if not phones:

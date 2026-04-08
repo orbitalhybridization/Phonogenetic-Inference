@@ -57,6 +57,11 @@ NGRAM_SIZES = list(range(NGRAM_MIN, NGRAM_MAX + 1))  # [2, 3, 4]
 # Vector normalization method: 'l2' or None
 VECTOR_NORMALIZATION = "l2"
 
+# Vocabulary building across languages: 'union' or 'intersection'
+# - 'union': all unique phones/ngrams across all languages (default, captures full diversity)
+# - 'intersection': only phones/ngrams common to all languages (for conservative analysis)
+VOCABULARY_MODE = "union"
+
 # ============================================================================
 # CLUSTERING SETTINGS
 # ============================================================================

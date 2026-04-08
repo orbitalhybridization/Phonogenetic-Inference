@@ -40,12 +40,13 @@ def extract_ngrams_from_sequence(phones: List[str], n: int) -> List[tuple]:
     return ngrams
 
 
-def create_phone_vector(aggregate_phones: List[str]) -> Tuple[np.ndarray, int]:
+def create_phone_vector(aggregate_phones: List[str], vocab: List[str] = None) -> Tuple[np.ndarray, int]:
     """
     Create normalized phone frequency vector.
     
     Args:
         aggregate_phones: All phones for the language
+        vocab: Fixed vocabulary list (if None, use language-specific phones)
     
     Returns:
         Tuple of (vector, total_phones)
@@ -56,23 +57,28 @@ def create_phone_vector(aggregate_phones: List[str]) -> Tuple[np.ndarray, int]:
     counter = Counter(aggregate_phones)
     total = len(aggregate_phones)
     
-    # Get all unique phones, sorted for consistency
-    phones = sorted(counter.keys())
+    # Use provided vocabulary or create from this language's phones
+    if vocab is None:
+        phones = sorted(counter.keys())
+    else:
+        phones = vocab
     
     # Create frequency vector normalized by total phones
-    vector = np.array([counter[p] / total for p in phones], dtype=np.float32)
+    vector = np.array([counter.get(p, 0) / total for p in phones], dtype=np.float32)
     
     return vector, total
 
 
 def create_ngram_vectors(
     aggregate_phones: List[str],
+    ngram_vocabs: Dict[int, List[tuple]] = None,
 ) -> Dict[int, np.ndarray]:
     """
     Create normalized n-gram frequency vectors.
     
     Args:
         aggregate_phones: All phones for the language
+        ngram_vocabs: Fixed vocabulary dicts for ngrams (if None, use language-specific)
     
     Returns:
         Dictionary mapping n -> vector for n in [2, 3, 4]
@@ -88,11 +94,16 @@ def create_ngram_vectors(
             continue
         
         counter = Counter(ngrams)
-        ngrams_sorted = sorted(counter.keys())
+        
+        # Use provided vocabulary or create from this language's ngrams
+        if ngram_vocabs is None or n not in ngram_vocabs:
+            ngrams_sorted = sorted(counter.keys())
+        else:
+            ngrams_sorted = ngram_vocabs[n]
         
         # Create frequency vector normalized by total phones
         vector = np.array(
-            [counter[ng] / total_phones for ng in ngrams_sorted],
+            [counter.get(ng, 0) / total_phones for ng in ngrams_sorted],
             dtype=np.float32
         )
         ngram_vectors[n] = vector
@@ -144,12 +155,80 @@ def create_combined_vector(
     return combined
 
 
-def vectorize_language(language: str) -> Tuple[bool, Dict]:
+def build_global_vocabularies() -> Tuple[List[str], Dict[int, List[tuple]]]:
     """
-    Create feature vectors for a single language.
+    Build unified phone and n-gram vocabularies across all available languages.
+    Mode determined by config.VOCABULARY_MODE: 'union' or 'intersection'
+    
+    Returns:
+        Tuple of (phone_vocab, ngram_vocabs_dict)
+    """
+    language_phones = {}
+    language_ngrams = {2: {}, 3: {}, 4: {}}
+    
+    # Scan all languages and collect their phones/ngrams
+    for language in config.LANGUAGES:
+        phone_seqs = utils.load_phone_sequences(language)
+        if not phone_seqs:
+            continue
+        
+        # Aggregate phones
+        lang_phones = utils.aggregate_phone_sequences(language)
+        if lang_phones:
+            language_phones[language] = set(lang_phones)
+            
+            # Extract n-grams
+            for n in [2, 3, 4]:
+                ngrams = extract_ngrams_from_sequence(lang_phones, n)
+                language_ngrams[n][language] = set(ngrams)
+    
+    if not language_phones:
+        return [], {2: [], 3: [], 4: []}
+    
+    # Combine based on vocabulary mode
+    if config.VOCABULARY_MODE == "union":
+        # Union: all unique phones across all languages
+        all_phones = set()
+        for phones in language_phones.values():
+            all_phones.update(phones)
+        
+        all_ngrams = {2: set(), 3: set(), 4: set()}
+        for n in [2, 3, 4]:
+            for ngrams in language_ngrams[n].values():
+                all_ngrams[n].update(ngrams)
+    
+    elif config.VOCABULARY_MODE == "intersection":
+        # Intersection: only phones common to all languages
+        all_phones = set.intersection(*language_phones.values()) if language_phones else set()
+        
+        all_ngrams = {2: set(), 3: set(), 4: set()}
+        for n in [2, 3, 4]:
+            ngram_sets = list(language_ngrams[n].values())
+            if ngram_sets:
+                all_ngrams[n] = set.intersection(*ngram_sets)
+    
+    else:
+        raise ValueError(f"Unknown VOCABULARY_MODE: {config.VOCABULARY_MODE}")
+    
+    # Convert to sorted lists
+    phone_vocab = sorted(list(all_phones))
+    ngram_vocabs = {n: sorted(list(all_ngrams[n])) for n in [2, 3, 4]}
+    
+    return phone_vocab, ngram_vocabs
+
+
+def vectorize_language(
+    language: str,
+    phone_vocab: List[str],
+    ngram_vocabs: Dict[int, List[tuple]],
+) -> Tuple[bool, Dict]:
+    """
+    Create feature vectors for a single language using unified vocabularies.
     
     Args:
         language: Language name
+        phone_vocab: Global phone vocabulary
+        ngram_vocabs: Global n-gram vocabularies
     
     Returns:
         Tuple of (success, stats_dict)
@@ -161,11 +240,11 @@ def vectorize_language(language: str) -> Tuple[bool, Dict]:
         utils.print_error(f"No phone sequences found for {language}")
         return False, {}
     
-    # Create phone vector
-    phone_vector, total_phones = create_phone_vector(all_phones)
+    # Create phone vector with global vocabulary
+    phone_vector, total_phones = create_phone_vector(all_phones, vocab=phone_vocab)
     
-    # Create n-gram vectors
-    ngram_vectors = create_ngram_vectors(all_phones)
+    # Create n-gram vectors with global vocabularies
+    ngram_vectors = create_ngram_vectors(all_phones, ngram_vocabs=ngram_vocabs)
     
     # Create combined vector
     combined_vector = create_combined_vector(
@@ -267,11 +346,26 @@ def main():
     
     utils.print_step(3, "VECTORIZATION")
     utils.print_info(f"Languages to process: {', '.join(languages)}")
+    utils.print_info(f"Vocabulary mode: {config.VOCABULARY_MODE.upper()}")
+    
+    # Build global vocabularies first
+    utils.print_info("Building unified vocabularies across available languages...")
+    phone_vocab, ngram_vocabs = build_global_vocabularies()
+    
+    if not phone_vocab:
+        utils.print_error("No phones found in any language")
+        return 1
+    
+    utils.print_success(
+        f"Global vocabulary ({config.VOCABULARY_MODE}): {len(phone_vocab)} unique phones, "
+        f"{len(ngram_vocabs[2])}/{len(ngram_vocabs[3])}/{len(ngram_vocabs[4])} "
+        f"2/3/4-grams"
+    )
     
     vectorization_stats = {}
     
     for language in languages:
-        success, stats = vectorize_language(language)
+        success, stats = vectorize_language(language, phone_vocab, ngram_vocabs)
         
         if not success:
             utils.print_error(f"{language}: Vectorization failed")
