@@ -38,12 +38,12 @@ def print_header(text):
 
 def print_success(text):
     """Print success message."""
-    print(f"{GREEN}✓{RESET}  {text}")
+    print(f"{GREEN}[OK]{RESET}  {text}")
 
 
 def print_error(text):
     """Print error message."""
-    print(f"{RED}✗{RESET}  {text}")
+    print(f"{RED}[ERROR]{RESET}  {text}")
 
 
 def print_step(step_num, text):
@@ -79,7 +79,7 @@ def check_input_files():
     
     print_success(f"Found {len(wav_files)} WAV files:")
     for lang, count in sorted(languages.items()):
-        print(f"   {lang}: {count} files")
+        print(f"  {lang}: {count} files")
     print()
     
     return True
@@ -110,30 +110,30 @@ def run_script(script_num, script_name, description):
 def print_results():
     """Print information about output files."""
     print_header("PIPELINE COMPLETE")
-    print(f"{GREEN}✓{RESET}  All steps finished successfully!\n")
+    print(f"{GREEN}[OK]{RESET}  All steps finished successfully!\n")
     
     print(f"{BOLD}Your results are in the output/ folder:{RESET}\n")
     
-    print(f"{YELLOW}📊 Phone Analysis:{RESET}")
-    print("   output/phone_summaries/[language]/")
-    print("   ├── stats.txt (frequency statistics)")
-    print("   ├── top_phones.png (top 10 chart)")
-    print("   └── phone_distribution.png (pie chart)\n")
+    print(f"{YELLOW}Phone Analysis:{RESET}")
+    print("  output/phone_summaries/[language]/")
+    print("    - stats.txt (frequency statistics)")
+    print("    - top_phones.png (top 10 chart)")
+    print("    - phone_distribution.png (pie chart)\n")
     
-    print(f"{YELLOW}📈 Feature Vectors:{RESET}")
-    print("   output/vectors/[language]/")
-    print("   ├── combined.npy (unified feature vector)")
-    print("   ├── phones.npy, 2grams.npy, 3grams.npy, 4grams.npy")
-    print("   └── feature_stats.txt (dimension breakdown)\n")
+    print(f"{YELLOW}Feature Vectors:{RESET}")
+    print("  output/vectors/[language]/")
+    print("    - combined.npy (unified feature vector)")
+    print("    - phones.npy, 2grams.npy, 3grams.npy, 4grams.npy")
+    print("    - feature_stats.txt (dimension breakdown)\n")
     
-    print(f"{YELLOW}🌳 Phylogenetic Tree:{RESET}")
-    print("   output/results/trees/")
-    print("   ├── dendrogram.png (language relationships)")
-    print("   └── clustering_summary.txt (distance statistics)\n")
+    print(f"{YELLOW}Phylogenetic Tree:{RESET}")
+    print("  output/results/trees/")
+    print("    - dendrogram.png (language relationships)")
+    print("    - clustering_summary.txt (distance statistics)\n")
     
     dendrogram_path = Path("output/results/trees/dendrogram.png")
     if dendrogram_path.exists():
-        print(f"{GREEN}✓{RESET}  Open {BOLD}output/results/trees/dendrogram.png{RESET} to see your language tree! 🎉\n")
+        print(f"{GREEN}[OK]{RESET}  Open {BOLD}output/results/trees/dendrogram.png{RESET} to see your language tree\n")
 
 
 def main():
