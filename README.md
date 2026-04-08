@@ -2,17 +2,15 @@
 
 A modular, user-friendly pipeline for analyzing phonetic diversity across languages. Recognizes phones from audio files, computes linguistic features, and infers phylogenetic relationships through hierarchical clustering.
 
-## Quick Start (Easiest Way)
-
-**No Python experience needed! Just:**
+## Quick Start
 
 ```bash
-# 1. Put your audio files in input/ folder
+# 1. Place audio files in input/ folder
 #    input/english/*.wav
 #    input/french/*.wav
 #    etc.
 
-# 2. Run ONE of these commands:
+# 2. Run one of these commands:
 
 # Option A: Shell script (Mac/Linux):
 ./run_pipeline.sh
@@ -21,7 +19,7 @@ A modular, user-friendly pipeline for analyzing phonetic diversity across langua
 python run_pipeline.py
 ```
 
-That's it! The script will:
+Pipeline will:
 - Recognize phones from all audio files
 - Summarize statistics per language
 - Create feature vectors
