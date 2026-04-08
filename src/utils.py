@@ -16,14 +16,14 @@ def ensure_directory(path: Path) -> None:
 
 def get_language_input_dir(language: str) -> Path:
     """Get input directory for a specific language."""
-    from config import INPUT_DIR
+    from arawak_phones.phono_phylo_inference.src.config import INPUT_DIR
     lang_dir = INPUT_DIR / language
     return lang_dir
 
 
 def get_language_phones_dir(language: str) -> Path:
     """Get phones output directory for a specific language."""
-    from config import PHONES_DIR
+    from arawak_phones.phono_phylo_inference.src.config import PHONES_DIR
     lang_dir = PHONES_DIR / language
     ensure_directory(lang_dir)
     return lang_dir
@@ -31,7 +31,7 @@ def get_language_phones_dir(language: str) -> Path:
 
 def get_language_summaries_dir(language: str) -> Path:
     """Get phone_summaries output directory for a specific language."""
-    from config import PHONE_SUMMARIES_DIR
+    from arawak_phones.phono_phylo_inference.src.config import PHONE_SUMMARIES_DIR
     lang_dir = PHONE_SUMMARIES_DIR / language
     ensure_directory(lang_dir)
     return lang_dir
@@ -39,7 +39,7 @@ def get_language_summaries_dir(language: str) -> Path:
 
 def get_language_vectors_dir(language: str) -> Path:
     """Get vectors output directory for a specific language."""
-    from config import VECTORS_DIR
+    from arawak_phones.phono_phylo_inference.src.config import VECTORS_DIR
     lang_dir = VECTORS_DIR / language
     ensure_directory(lang_dir)
     return lang_dir
